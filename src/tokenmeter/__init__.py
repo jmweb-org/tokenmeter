@@ -4,7 +4,7 @@ from tokenmeter.meter import Measurement, measure, over_budget, total_cost
 from tokenmeter.pricing import ModelPrice, known_models, price_for
 from tokenmeter.pricing import total_cost as cost
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "Measurement",
