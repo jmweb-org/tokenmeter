@@ -24,7 +24,8 @@ $ tokenmeter count prompts/ --model gpt-4o-mini --json
 ## Install
 
 ```console
-$ pip install tokenmeter-cli
+$ pip install tokenmeter-cli                 # from PyPI, once released
+$ pip install git+https://github.com/jmweb-org/tokenmeter   # latest, available now
 ```
 
 Token counting is exact for the supported OpenAI encodings via `tiktoken`.
