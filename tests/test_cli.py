@@ -42,6 +42,53 @@ def test_count_unknown_model_is_bad_input(tmp_path):
     assert result.exit_code == cli_module.EXIT_BAD_INPUT
 
 
+def test_count_uses_custom_prices_file(tmp_path):
+    f = tmp_path / "p.txt"
+    f.write_text("one two three four")
+    prices = tmp_path / "prices.json"
+    prices.write_text(
+        '{"local-model": {"encoding": "cl100k_base", "input_per_mtok": 1.0, '
+        '"output_per_mtok": 3.0}}'
+    )
+
+    result = runner.invoke(
+        cli_module.app,
+        [
+            "count",
+            str(f),
+            "--model",
+            "local-model",
+            "--output-tokens",
+            "2",
+            "--prices-file",
+            str(prices),
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["inputs"][0]["model"] == "local-model"
+    assert payload["inputs"][0]["input_cost"] == 0.000004
+    assert payload["inputs"][0]["output_cost"] == 0.000006
+    assert payload["total_cost"] == 0.00001
+
+
+def test_prices_file_schema_error_is_bad_input(tmp_path):
+    f = tmp_path / "p.txt"
+    f.write_text("hello")
+    prices = tmp_path / "prices.json"
+    prices.write_text('{"broken": {"encoding": "cl100k_base"}}')
+
+    result = runner.invoke(
+        cli_module.app,
+        ["count", str(f), "--model", "broken", "--prices-file", str(prices)],
+    )
+
+    assert result.exit_code == cli_module.EXIT_BAD_INPUT
+    assert "missing required" in result.stderr
+
+
 def test_budget_passes_under_limit(tmp_path):
     f = tmp_path / "p.txt"
     f.write_text("one two three")
