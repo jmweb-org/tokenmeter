@@ -1,7 +1,7 @@
 # tokenmeter
 
 [![CI](https://github.com/jmweb-org/tokenmeter/actions/workflows/ci.yml/badge.svg)](https://github.com/jmweb-org/tokenmeter/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/tokenmeter.svg)](https://pypi.org/project/tokenmeter/)
+[![PyPI](https://img.shields.io/pypi/v/tokenmeter-cli.svg)](https://pypi.org/project/tokenmeter-cli/)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -24,7 +24,7 @@ $ tokenmeter count prompts/ --model gpt-4o-mini --json
 ## Install
 
 ```console
-$ pip install tokenmeter
+$ pip install tokenmeter-cli
 ```
 
 Token counting is exact for the supported OpenAI encodings via `tiktoken`.

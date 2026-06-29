@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tokenmeter"
+name = "tokenmeter-cli"
 version = "0.2.0"
 description = "Count tokens and estimate cost for prompts before you send them."
 readme = "README.md"
