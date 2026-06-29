@@ -1,5 +1,10 @@
 # tokenmeter
 
+[![CI](https://github.com/jmweb-org/tokenmeter/actions/workflows/ci.yml/badge.svg)](https://github.com/jmweb-org/tokenmeter/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/tokenmeter.svg)](https://pypi.org/project/tokenmeter/)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Count tokens and estimate cost for prompts before you send them, from the
 command line or as a CI budget gate.
 
