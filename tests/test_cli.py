@@ -31,8 +31,20 @@ def test_count_file_json(tmp_path):
     result = runner.invoke(cli_module.app, ["count", str(f), "--json"])
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
+    assert set(payload) == {"inputs", "total_tokens", "total_cost"}
     assert payload["total_tokens"] == 4
-    assert payload["inputs"][0]["input_tokens"] == 4
+    assert payload["total_cost"] == 0.00001
+    assert payload["inputs"] == [
+        {
+            "name": str(f),
+            "model": "gpt-4o",
+            "input_tokens": 4,
+            "output_tokens": 0,
+            "input_cost": 0.00001,
+            "output_cost": 0.0,
+            "total_cost": 0.00001,
+        }
+    ]
 
 
 def test_count_unknown_model_is_bad_input(tmp_path):

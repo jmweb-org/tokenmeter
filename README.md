@@ -40,6 +40,49 @@ $ tokenmeter count p.txt --output-tokens 500     # include an assumed completion
 $ tokenmeter models                              # list models and prices
 ```
 
+### JSON output
+
+Pass `--json` to emit a machine-readable summary that scripts and CI jobs can parse:
+
+```console
+$ tokenmeter count prompts/system.txt --model gpt-4o --output-tokens 500 --json
+{
+  "inputs": [
+    {
+      "name": "prompts/system.txt",
+      "model": "gpt-4o",
+      "input_tokens": 812,
+      "output_tokens": 500,
+      "input_cost": 0.00203,
+      "output_cost": 0.005,
+      "total_cost": 0.00703
+    }
+  ],
+  "total_tokens": 1312,
+  "total_cost": 0.00703
+}
+```
+
+The top-level object contains:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `inputs` | array | One object per input file, directory entry, or stdin stream. |
+| `total_tokens` | integer | Sum of input and assumed output tokens across all inputs. |
+| `total_cost` | number | Estimated total USD cost across all inputs, rounded to 6 decimal places. |
+
+Each `inputs[]` object contains:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name` | string | Input name, such as a file path or `-` for stdin. |
+| `model` | string | Model used for token counting and pricing. |
+| `input_tokens` | integer | Counted prompt/input tokens. |
+| `output_tokens` | integer | Assumed completion tokens from `--output-tokens` (defaults to `0`). |
+| `input_cost` | number | Estimated USD input-token cost, rounded to 6 decimal places. |
+| `output_cost` | number | Estimated USD output-token cost, rounded to 6 decimal places. |
+| `total_cost` | number | Estimated USD cost for the input, rounded to 6 decimal places. |
+
 ### As a budget gate
 
 Fail a build when a prompt set would cost more than you allow:
