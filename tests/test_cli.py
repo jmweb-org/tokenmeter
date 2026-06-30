@@ -74,6 +74,54 @@ def test_count_uses_custom_prices_file(tmp_path):
     assert payload["total_cost"] == 0.00001
 
 
+def test_count_uses_prices_file_from_environment(tmp_path, monkeypatch):
+    f = tmp_path / "p.txt"
+    f.write_text("one two")
+    prices = tmp_path / "prices.json"
+    prices.write_text(
+        '{"env-model": {"encoding": "cl100k_base", "input_per_mtok": 2.0, '
+        '"output_per_mtok": 4.0}}'
+    )
+    monkeypatch.setenv("TOKENMETER_PRICES_FILE", str(prices))
+
+    result = runner.invoke(cli_module.app, ["count", str(f), "--model", "env-model", "--json"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["inputs"][0]["model"] == "env-model"
+    assert payload["inputs"][0]["input_cost"] == 0.000004
+
+
+def test_prices_file_option_takes_precedence_over_environment(tmp_path, monkeypatch):
+    f = tmp_path / "p.txt"
+    f.write_text("one two")
+    env_prices = tmp_path / "env-prices.json"
+    env_prices.write_text('{"env-only": {"encoding": "cl100k_base"}}')
+    option_prices = tmp_path / "option-prices.json"
+    option_prices.write_text(
+        '{"option-model": {"encoding": "cl100k_base", "input_per_mtok": 1.5, '
+        '"output_per_mtok": 2.5}}'
+    )
+    monkeypatch.setenv("TOKENMETER_PRICES_FILE", str(env_prices))
+
+    result = runner.invoke(
+        cli_module.app,
+        [
+            "count",
+            str(f),
+            "--model",
+            "option-model",
+            "--prices-file",
+            str(option_prices),
+            "--json",
+        ],
+    )
+
+    assert result.exit_code == 0
+    payload = json.loads(result.stdout)
+    assert payload["inputs"][0]["model"] == "option-model"
+
+
 def test_prices_file_schema_error_is_bad_input(tmp_path):
     f = tmp_path / "p.txt"
     f.write_text("hello")

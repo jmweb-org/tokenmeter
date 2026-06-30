@@ -44,7 +44,10 @@ $ tokenmeter models                              # list models and prices
 ### Custom price files
 
 Use `--prices-file` with `count`, `budget`, or `models` to add new model prices or
-override the built-in table. The file is JSON keyed by model name:
+override the built-in table. Set `TOKENMETER_PRICES_FILE` to use the same custom
+price file for every command without repeating the flag; an explicit
+`--prices-file` value takes precedence over the environment variable. The file is
+JSON keyed by model name:
 
 ```json
 {

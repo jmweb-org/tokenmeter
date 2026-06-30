@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 
 import typer
@@ -56,10 +57,11 @@ def main(
 
 
 def _load_prices_or_exit(prices_file: str | None) -> None:
-    if prices_file is None:
+    prices_path = prices_file or os.environ.get("TOKENMETER_PRICES_FILE")
+    if prices_path is None:
         return
     try:
-        load_prices_file(prices_file)
+        load_prices_file(prices_path)
     except PriceFileError as exc:
         _err.print(f"tokenmeter: {exc}")
         raise typer.Exit(EXIT_BAD_INPUT) from exc
