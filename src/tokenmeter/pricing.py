@@ -7,7 +7,10 @@ the cost functions are pure and do not care where the rates came from.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 PRICES_AS_OF = "2025-08-01"
 
@@ -42,6 +45,65 @@ class UnknownModel(KeyError):
 
     def __str__(self) -> str:
         return f"unknown model: {self.model}"
+
+
+class PriceFileError(ValueError):
+    """Raised when an external price file cannot be loaded."""
+
+
+def _as_number(value: Any, *, model: str, field: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise PriceFileError(f"model {model!r} field {field!r} must be a number")
+    return float(value)
+
+
+def _as_string(value: Any, *, model: str, field: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise PriceFileError(f"model {model!r} field {field!r} must be a non-empty string")
+    return value
+
+
+def load_prices_file(path: str | Path) -> None:
+    """Merge model prices from a JSON file into the active price table.
+
+    The JSON file must contain a top-level object keyed by model name. Each value
+    must include ``encoding``, ``input_per_mtok`` and ``output_per_mtok``.
+    Existing model names are replaced, and new model names are added.
+    """
+
+    price_path = Path(path)
+    try:
+        raw = json.loads(price_path.read_text())
+    except OSError as exc:
+        raise PriceFileError(f"could not read price file {price_path}: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise PriceFileError(f"could not parse price file {price_path}: {exc}") from exc
+
+    if not isinstance(raw, dict):
+        raise PriceFileError("price file must contain a JSON object keyed by model name")
+
+    loaded: dict[str, ModelPrice] = {}
+    for model, payload in raw.items():
+        if not isinstance(model, str) or not model:
+            raise PriceFileError("price file model names must be non-empty strings")
+        if not isinstance(payload, dict):
+            raise PriceFileError(f"model {model!r} must map to a JSON object")
+        missing = {"encoding", "input_per_mtok", "output_per_mtok"} - payload.keys()
+        if missing:
+            fields = ", ".join(sorted(missing))
+            raise PriceFileError(f"model {model!r} is missing required field(s): {fields}")
+        loaded[model] = ModelPrice(
+            model=model,
+            encoding=_as_string(payload["encoding"], model=model, field="encoding"),
+            input_per_mtok=_as_number(
+                payload["input_per_mtok"], model=model, field="input_per_mtok"
+            ),
+            output_per_mtok=_as_number(
+                payload["output_per_mtok"], model=model, field="output_per_mtok"
+            ),
+        )
+
+    _PRICES.update(loaded)
 
 
 def known_models() -> list[str]:

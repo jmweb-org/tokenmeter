@@ -37,8 +37,30 @@ $ tokenmeter count system.txt -m gpt-4o          # one file
 $ tokenmeter count prompts/ -m gpt-4o-mini       # every text file in a directory
 $ cat prompt.txt | tokenmeter count - -m gpt-4o  # standard input
 $ tokenmeter count p.txt --output-tokens 500     # include an assumed completion
+$ tokenmeter count p.txt --prices-file prices.json # add or override model prices
 $ tokenmeter models                              # list models and prices
 ```
+
+### Custom price files
+
+Use `--prices-file` with `count`, `budget`, or `models` to add new model prices or
+override the built-in table. Set `TOKENMETER_PRICES_FILE` to use the same custom
+price file for every command without repeating the flag; an explicit
+`--prices-file` value takes precedence over the environment variable. The file is
+JSON keyed by model name:
+
+```json
+{
+  "local-model": {
+    "encoding": "cl100k_base",
+    "input_per_mtok": 1.0,
+    "output_per_mtok": 3.0
+  }
+}
+```
+
+Prices are in USD per 1,000,000 tokens. `encoding` must be a tiktoken encoding
+name such as `cl100k_base` or `o200k_base`.
 
 ### As a budget gate
 
